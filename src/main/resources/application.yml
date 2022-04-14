@@ -1,0 +1,109 @@
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        registerHealthIndicator: true   #acutator를 통해 circuitBreaker 상태 확인 가능 여부 설정
+        slidingWindowSize: 10
+        minimumNumberofCalls: 5   #circuit을 동작하기 위한 최소 call 수
+        permittedNumberOfCallsInHalfOpenState: 5    #circuit이 HALF_OPEN 상태일 때 허용되는 call 수
+        automaticTransitionFromOpenToHalfOpenEnabled: true  #circuit이 OPEN에서 HALF_OPEN으로 변경시키는 트리거를 위한 모니터링 thread를 별도로 둘지 여부
+        waitDurationInOpenState: 5s   #circuit이 OPEN 상태가 되고나서 대기하는 시간
+        failureRateThreshold: 50    #실패율 임계값 (기본값: 50%)
+        eventConsumerBufferSize: 10
+        recordExceptions:   #failure count를 증가시켜야하는 exception list
+          - org.springframework.web.client.HttpServerErrorException
+          - java.util.concurrent.TimeoutException
+          - java.io.IOException
+        ignoreException:  #failure count를 증가시키지 않고 무시하는 exception list
+          - com.kyuth.resilience4j.demo.exceptions.IgnoreException
+      shared:
+        slidingWindowSize: 100
+        permittedNumberOfCallsInHalfOpenState: 30
+        waitDurationInOpenState: 1s
+        failureRateThreshold: 50
+        eventConsumerBufferSize: 10
+    instances:
+      typeA:
+        baseConfig: default
+        waitDurationInOpenState: 30s
+      typeB:
+        registerHealthIndicator: true
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 10
+        permittedNumberOfCallsInHalfOpenState: 3
+        waitDurationInOpenState: 5s
+        failureRateThreshold: 50
+        eventConsumerBufferSize: 10
+
+  #재시도 관리
+  retry:
+    configs:
+      default:
+        maxAttempts: 3
+        waitDuration: 100
+        retryExceptions:
+          - org.springframework.web.client.HttpServerErrorException
+          - java.util.concurrent.TimeoutException
+          - java.io.IOException
+        ignoreExceptions:
+          - com.kyuth.resilience4j.demo.exceptions.IgnoreException
+      instances:
+        typeA:
+          baseConfig: default
+        typeB:
+          baseConfig: default
+
+  #병렬작업 제한 관리
+  bulkhead:
+    configs:
+      defalut:
+        maxConcurrentCalls: 100 #병렬실행 허용 수
+    instances:
+      typeA:
+        maxConcurrentCalls: 10
+      typeB:
+        maxWaitDuration: 10ms #thread block 허용 시간
+        maxConcurrentCalls: 20
+
+  thread-pool-bulkhead:
+    configs:
+      default:
+        maxThreadPoolSize: 4
+        coreThreadPoolSize: 2
+        queueCapacity: 2
+    instances:
+      typeA:
+        baseConfig: default
+      typeB:
+        maxThreadPoolSize: 1
+        coreThreadPoolSize: 1
+        queueCapacity: 1
+
+  #요청 제한 관리
+  ratelimiter:
+    configs:
+      default:
+        registerHealthIndicator: false
+        limitForPeriod: 10  #limitRefreshPeriod 동안 permission 허용 수
+        limitRefreshPeriod: 1s  #permission 초기화 주기
+        timeoutDuration: 0  #permission thread 대기 시간
+        eventConsumerBufferSize: 100
+    instances:
+      typeA:
+        baseConfig: default
+      typeB:
+        limitForPeriod: 6
+        limitRefreshPeriod: 500ms
+        timeoutDuration: 3s
+
+  #실행 시간 제한 관리
+  timelimiter:
+    configs:
+      default:
+        cancelRunningFuture: false
+        timeoutDuration: 2s
+    instances:
+      typeA:
+        baseConfig: default
+      typeB:
+        baseConfig: default
