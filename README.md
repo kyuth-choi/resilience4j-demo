@@ -8,8 +8,6 @@ states : CLOSED, OPEN, HALF_OPEN
 
 special states : DISABLED(항상 접근 허용), FORCED_OPEN(항상 접근 거부)
 
-![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/34821f45-d112-4fa9-869d-6766c5fb5294/Untitled.png)
-
 CircuitBreaker는 요청의 저장과 총계를 내는데 sliding window를 사용한다 
 
 count-based sliding window와 time-based sliding window를 선택적으로 사용가능함
@@ -40,12 +38,7 @@ time-based sliding window는 N개 이하의  원형 배열로 구현됨
 
 또한 총집계에서도 빠지게 되며 해당 버킷은 초기화 된다.
 
+## 참조
 
-Example with 1 Thread:
-
-![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/d95eb81e-bfa2-49c7-aba8-46546364f34c/Untitled.png)
-
-Example with 3 Threads:
-
-![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/2c6c3d32-4d27-45c0-a829-111b2d912fad/Untitled.png)
-
+* resilience4j : https://resilience4j.readme.io/docs/circuitbreaker
+* resilience4j-github : https://github.com/resilience4j/resilience4j
